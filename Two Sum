@@ -1,0 +1,86 @@
+/*
+  给定一个数组和一个目标数，找出数组中两数之和等于目标数的下标并返回,注:一个数不能用两次
+  
+  Given nums = [2, 7, 11, 15], target = 9,
+  Because nums[0] + nums[1] = 2 + 7 = 9,
+  return [0, 1].
+*/
+
+//第一次看到这问题首先想到的是暴力破解，两个for循环就完事了,这个方法简单粗暴，但是提交后运行了37ms,排名也是最后的批次，两个for循环的时间复杂度是O(n^2)
+//这显然不是牛逼的解决办法。
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        int temp[] = new int[2];
+        for(int i = 0; i < nums.length; i++)
+            for(int j = i+1; j < nums.length; j++ )
+                if(nums[i]+nums[j] == target){
+                    temp[0] = i;
+                    temp[1] = j;
+                    return temp;
+                }
+         return null;           
+    }
+}
+//想要降低时间复杂度，就必须减少for循环的次数，比如for循环一次，在discuss区看到一个大哥发布的代码很是巧妙，如下：
+//这个算法的思路是利用java自带的排序方法先将数组排个序，再用半二分查找的思想求和比较，效率很高，提交后的运行时间是3ms，快了十倍不止
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        int[] backup = nums.clone();//先clone原数组作为备用
+        Arrays.sort(nums);//排序
+        
+        int a = 0;//数组的起始位置
+        int b = nums.length-1;//数组末位
+        
+        int res[] = new Solution().compare(nums,target,a,b);//调用compare方法，返回排好序数组中目标数据的下标
+        if(res == null)
+            return null;
+        boolean flagA = true;
+        boolean flagB = true;
+        
+        for(int i = 0; i < backup.length; i++){//遍历原数组
+            if(backup[i] == nums[res[0]] && flagA){//找到原数组中数据和有序数组中数据一样的下标a
+                a = i;
+                flagA = false;
+                continue;
+            }
+            if(backup[i] == nums[res[1]] && flagB){//找到原数组中数据和有序数组中数据一样的下标b
+                b = i;
+                flagB = false;
+                continue;
+            }
+        }
+
+        return new int[]{a,b};  //返回      
+        
+    }
+    public  int[] compare(int[] nums, int target, int a, int b){
+        if(a == b)
+            return null;//同一个数不能使用两次
+        int currentRes = nums[a]+nums[b];//求和
+        if(currentRes == target)//和target比较
+            return new int[]{a,b};
+        else if(currentRes < target)
+           return compare(nums,target,a+1,b);//首尾两数求和小于target，首位数据后移，递归
+        else if(currentRes > target)
+            return compare(nums,target,a,b-1);//首尾两数求和小于target，末位数据前移，递归
+        
+        return null;
+        
+    }
+}
+//上面的算法已经很快了，但是代码未免太多了，官网给出的最佳算法是用的hashmap做的，首先遍历数组，用target减去每一个数组中的元素得到差值complement，再去map中查找
+//是否存在对应的complement，如果存在则表示找到了这两个目标数的下标，返回即可，如果不存在则把当前(nums[i],i)放入map中，进行下一次循环。这个算法的时间复杂度
+//是O(n),提交后运行时间也是3ms,代码很少。
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        Map<Integer,Integer> map = new HashMap<>();
+        for(int i = 0; i < nums.length; i++){
+            int complement = target -nums[i];
+            if(map.containsKey(complement))
+                return new int[]{map.get(complement),i};
+            map.put(nums[i],i);
+        }
+        return null;
+    }
+   
+}
