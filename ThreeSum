@@ -1,0 +1,99 @@
+/**
+  leetcode上的3Sum问题,题目描述是这样子的：
+    给定一个数组，从中找出和为0的三个数的组数，即每三个数是一组，每组数据不一样。
+    官网描述：
+    Given array nums = [-1, 0, 1, 2, -1, -4],
+
+        A solution set is:
+        [
+          [-1, 0, 1],
+          [-1, -1, 2]
+        ]
+    解题思路：
+          1.暂时水平有限，首先想到的还是暴力解决它(后面提交了时间太长被拒绝了)，首先是进行三个for循环，对三个数求和，为0的话，先判断目标list中是否
+          包含了这个组数(顺序无所谓)，不包含就将这组数放入list中。
+          2.这个思路是看discuss区大神的，首先是对数据进行一把排序（从小到大），然后遍历这个数组，首先把第一个数确定下来，用0-这个数得到剩下两个数想加的
+          和，接着对剩下的数利用twoSum的解法求出另外两个数，注意去重即可。去重是个技术活，以下贴代码再解释。
+*/
+
+//暴力解法，(在eclipse运行没毛病)
+package com.leetcode.problems;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
+public class ThreeSum {
+	public static List<List<Integer>> threeSum(int[] nums) {
+		List<List<Integer>> res = new LinkedList<List<Integer>>();
+		for(int i = 0; i < nums.length; i++)
+	                for(int j = i+1; j < nums.length; j++)
+	                    for(int k = j+1; k < nums.length; k++){
+	                        if(nums[i]+nums[j]+nums[k] == 0){
+	                            //判断是否重复
+	                            boolean flag = false;
+	                            for (List<Integer> list2 : res) {
+	                            	//遍历res中的每一个list，判断是否包含相同的三个数
+	                            	List<Integer> list = new ArrayList<>(list2);//因为下面将一个数组转为list，所以这里要做一步转换，不然list.remove()会报错
+	                            	if (list.contains(nums[i])) {//list中包含其中一个数，将其从list中remove,否则对于[0，0，0]这样的组合无法求出
+	                            		int index = list.indexOf(nums[i]);
+	                            		list.remove(index);
+									}
+	                            	if (list.contains(nums[k])) {
+	                            		list.remove(list.indexOf(nums[k]));
+									}
+	                            	if (list.contains(nums[j])) {
+										list.remove(list.indexOf(nums[j]));
+									}
+	                            	if (list.isEmpty()) {
+										flag = true;
+	                            		break;
+										
+									}
+	                            }
+	                            
+	                            if(!flag) {
+									res.add(Arrays.asList(nums[i],nums[j],nums[k]));//这里是将一个数组转换为list，要格外注意，可参照(https://blog.csdn.net/Tracycater/article/details/77592472)
+								}	
+	                        }
+	                    }
+	            return res;        
+	    }
+	public static void main(String[] args) {
+		int[] nums = {0, -1, 1, 2, -1, -4,0,0};
+		List<List<Integer>> list = threeSum(nums);
+		for (List<Integer> list2 : list) {
+			System.out.println(list2);
+		}
+		
+	}
+
+}
+
+//大神解法
+public List<List<Integer>> threeSum(int[] num) {
+    Arrays.sort(num);
+    List<List<Integer>> res = new LinkedList<>(); 
+    for (int i = 0; i < num.length-2; i++) {
+        if (i == 0 || (i > 0 && num[i] != num[i-1])) {//(i > 0 && num[i] != num[i-1])这个判断条件是为了避免出现重复的三元组
+        //假设排序后的数组是这样的[-4,-3,-2,-2,0,1,1,1,2,2,2],当i=2时,明显可以看到目标三元组是[-2,1,1]，当i=3时，如不跳过,则又会得到一组[-2,1,1]
+            int lo = i+1, hi = num.length-1, sum = 0 - num[i];
+            while (lo < hi) {
+                if (num[lo] + num[hi] == sum) {
+                    res.add(Arrays.asList(num[i], num[lo], num[hi]));
+                    while (lo < hi && num[lo] == num[lo+1]) lo++; //这个判断条件是为了避免出现重复的三元组,当i=0时,明显可以看到目标三元组是[-4,2,2]，
+                    //如不判断,lo=7时得到一组[-4,2,2],lo=8时又得到一组[-4,2,2]，下面同理
+                    while (lo < hi && num[hi] == num[hi-1]) hi--;//这个判断条件是为了避免出现重复的三元组
+                    lo++; hi--;
+                } else if (num[lo] + num[hi] < sum) lo++;
+                else hi--;
+           }
+        }
+    }
+    return res;
+    }
+}
+
+
+
