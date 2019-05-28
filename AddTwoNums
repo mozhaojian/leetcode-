@@ -1,0 +1,54 @@
+/*
+给定两个非负整数的链表(自定义的)，按照数字相反的顺序存储，然后将这两个链表存储的数据相加，相加的结果也是以倒序存储的自定义链表返回
+比如：
+Input: (2 -> 4 -> 3) + (5 -> 6 -> 4)
+Output: 7 -> 0 -> 8
+Explanation: 342 + 465 = 807.
+*/
+自定义链表的数据结构如下：
+public class ListNode {
+	int val;
+	ListNode next;
+	public ListNode(int x) {
+		val = x;
+	}
+	@Override
+	public String toString() {
+		return "ListNode [val=" + val + ", next=" + next + "]";
+	}
+}
+
+思路：
+这其实是做一个加法运算，但是要注意以下几点
+1、加的过程中注意进一:342+465=807
+2、两个位数不同的数相加:100+1=101
+3、两数相加结果由N位变N+1位：99+1=100
+
+官方代码实现(注意java中引用的用法)：
+public static ListNode addTwoNums(ListNode l1, ListNode l2) {
+		ListNode dummyHead = new ListNode(0);//新建一个结果ListNode
+		ListNode p = l1,q = l2, curr = dummyHead;//curr是对dummyHead的引用
+		int carry = 0;//两数相加是否需要进一
+		while (p != null || q != null) {
+			int x = (p != null) ? p.val : 0;//利用三目运算符获取每个节点的值
+			int y = (q != null) ? q.val : 0;
+			int sum = x+y+carry;
+			carry = sum / 10;
+			sum = sum % 10;
+			curr.next = new ListNode(sum);//注意，curr引用的是dummyHead，curr.next相当于dummyHead.next
+			curr = curr.next;//curr指向了dummyHead.next
+			if (p != null) {
+				p = p.next;
+			}
+			if (q != null) {
+				q = q.next;
+			}
+		}
+		if (carry > 0) {//两数相加结果由N位变N+1位
+			curr.next = new ListNode(carry);
+		}
+		
+		return dummyHead.next;
+		
+		
+	}
